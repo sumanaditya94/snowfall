@@ -1,0 +1,28 @@
+name: 🔥Cozy Fireplace Crackling ❄️Snowy Cabin Winter Ambience (No Music)
+
+on:
+  schedule:
+    # IST (Indian Standard Time) অনুযায়ী শিডিউল:
+    - cron: '30 2 * * *'  # সকাল ৮:০০ টা
+    - cron: '30 7 * * *'  # দুপুর ১:০০ টা
+    - cron: '30 12 * * *' # বিকেল ৫:৩০ টা
+    - cron: '30 16 * * *' # রাত ৯:৩০ টা
+  workflow_dispatch: # যখনই ইচ্ছা ম্যানুয়ালি স্টার্ট করার জন্য
+
+jobs:
+  stream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60 # ৬০ মিনিট পর অটোমেটিক বন্ধ হবে
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Start Streaming
+        run: |
+          ffmpeg -re -stream_loop -1 -i video.mp4 \
+          -c:v libx264 -preset veryfast -b:v 4500k -maxrate 4500k -bufsize 9000k \
+          -pix_fmt yuv420p -g 60 -c:a aac -b:a 128k -ar 44100 \
+          -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.STREAM_KEY }}"
