@@ -1,27 +1,29 @@
 name: 🔥 Cozy Fireplace Crackling ❄️ Snowy Cabin Winter Ambience (No Music)
-
 on:
-  schedule:
-    - cron: '30 2 * * *'  # সকাল ৮:০০ টা
-    - cron: '30 7 * * *'  # দুপুর ১:০০ টা
-    - cron: '30 12 * * *' # বিকেল ৫:৩০ টা
-    - cron: '30 16 * * *' # রাত ৯:৩০ টা
   workflow_dispatch:
 
 jobs:
   stream:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      - name: Start Streaming
         run: |
-          ffmpeg -re -stream_loop -1 -i video.mp4 \
-          -c:v libx264 -preset veryfast -b:v 4500k -maxrate 4500k -bufsize 9000k \
-          -pix_fmt yuv420p -g 60 -c:a aac -b:a 128k -ar 44100 \
-          -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.STREAM_KEY }}"
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Check video file
+        run: ls -la video.mp4 || echo "Video file not found in root!"
+
+      - name: Stream to YouTube
+        env:
+          STREAM_KEY: ${{ secrets.YOUTUBE_STREAM_KEY }}
+        run: |
+          ffmpeg -stream_loop -1 -i video.mp4 \
+            -c:v libx264 -b:v 2500k -maxrate 2500k -bufsize 5000k \
+            -pix_fmt yuv420p -g 50 \
+            -c:a aac -b:a 128k \
+            -f flv rtmp://a.rtmp.youtube.com/live2/$STREAM_KEY || echo "Stream failed - check key or file"
