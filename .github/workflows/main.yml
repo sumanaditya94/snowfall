@@ -1,5 +1,21 @@
-name: Manual Infinite Loop Live Stream
-on:  workflow_dispatch: # এটি শুধুমাত্র ম্যানুয়ালি স্টার্ট করার বাটন দেবে
-jobs:  stream:    runs-on: ubuntu-latest    steps:      - name: Checkout Code        uses: actions/checkout@v3
-      - name: Install FFmpeg        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - name: Start Streaming        run: |          ffmpeg -re -stream_loop -1 -i video.mp4 \          -c:v libx264 -preset veryfast -b:v 3000k -maxrate 3000k -bufsize 6000k \          -pix_fmt yuv420p -g 60 -c:a aac -b:a 128k -ar 44100 \          -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.STREAM_KEY }}"
+name: Manual Loop Stream
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Start Streaming
+        run: |
+          ffmpeg -re -stream_loop -1 -i video.mp4 \
+          -c:v libx264 -preset veryfast -b:v 3000k -maxrate 3000k -bufsize 6000k \
+          -pix_fmt yuv420p -g 60 -c:a aac -b:a 128k -ar 44100 \
+          -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.STREAM_KEY }}"
